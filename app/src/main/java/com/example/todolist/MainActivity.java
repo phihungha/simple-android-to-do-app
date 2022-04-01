@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         @NonNull
         @Override
         public Intent createIntent(@NonNull Context context, Void input) {
-            return new Intent(MainActivity.this, AddTaskActivity.class);
+            return new Intent(MainActivity.this, TaskDetailsActivity.class);
         }
 
         @Override
@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         @NonNull
         @Override
         public Intent createIntent(@NonNull Context context, Task input) {
-            Intent intent = new Intent(MainActivity.this, AddTaskActivity.class);
+            Intent intent = new Intent(MainActivity.this, TaskDetailsActivity.class);
             intent.putExtras(Task.getBundleFromTask(input));
             return intent;
         }

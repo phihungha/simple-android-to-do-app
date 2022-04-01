@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ToDoList">
         <activity
-            android:name=".AddTaskActivity"
+            android:name=".TaskDetailsActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

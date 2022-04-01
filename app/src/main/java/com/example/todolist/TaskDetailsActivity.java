@@ -11,7 +11,7 @@ import androidx.fragment.app.DialogFragment;
 
 import java.time.LocalDateTime;
 
-public class AddTaskActivity extends AppCompatActivity {
+public class TaskDetailsActivity extends AppCompatActivity {
 
     private Task currentTask = new Task("",
             LocalDateTime.now(),
@@ -24,7 +24,7 @@ public class AddTaskActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_task);
+        setContentView(R.layout.activity_task_details);
 
         EditText titleEditText = findViewById(R.id.title_edittext);
         EditText startTimeEditText = findViewById(R.id.startTimeEditText);
