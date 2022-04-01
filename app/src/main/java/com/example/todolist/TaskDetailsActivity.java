@@ -47,12 +47,12 @@ public class TaskDetailsActivity extends AppCompatActivity {
         ImageButton endDateButton = findViewById(R.id.end_date_button);
 
         startDateButton.setOnClickListener(view -> {
-            DialogFragment newFragment = new DatePickerFragment(false);
+            DialogFragment newFragment = new DatePickerFragment(false, startTime);
             newFragment.show(getSupportFragmentManager(), "startTimeDatePicker");
         });
 
         endDateButton.setOnClickListener(view -> {
-            DialogFragment newFragment = new DatePickerFragment(true);
+            DialogFragment newFragment = new DatePickerFragment(true, endTime);
             newFragment.show(getSupportFragmentManager(), "endTimeDatePicker");
         });
 
@@ -76,15 +76,20 @@ public class TaskDetailsActivity extends AppCompatActivity {
         });
     }
 
-    public void setStartTime(int year, int month, int day) {
-        startTime = LocalDateTime.of(year, month, day, 0, 0);
+    public void setStartTime(LocalDateTime time) {
+        startTime = time;
         EditText startTimeEditText = findViewById(R.id.startTimeEditText);
         startTimeEditText.setText(startTime.format(Task.dateTimeFormatter));
+        if (endTime.isBefore(startTime))
+            setEndTime(startTime.plusDays(1));
     }
 
-    public void setEndTime(int year, int month, int day) {
-        endTime = LocalDateTime.of(year, month, day, 0, 0);
+    public void setEndTime(LocalDateTime time) {
+        endTime = time;
         EditText endTimeEditText = findViewById(R.id.endTimeEditText);
         endTimeEditText.setText(endTime.format(Task.dateTimeFormatter));
+
+        if (startTime.isAfter(endTime))
+            setStartTime(endTime.minusDays(1));
     }
 }

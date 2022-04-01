@@ -9,13 +9,17 @@ import androidx.fragment.app.DialogFragment;
 
 import android.widget.DatePicker;
 
+import java.time.LocalDateTime;
 import java.util.Calendar;
 
 public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
     private final boolean endTime;
 
-    public DatePickerFragment(boolean endTime) {
+    private final LocalDateTime time;
+
+    public DatePickerFragment(boolean endTime, LocalDateTime time) {
         this.endTime = endTime;
+        this.time = time;
     }
 
     @Override
@@ -26,21 +30,19 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // Use the current date as the default date in the picker
-        final Calendar c = Calendar.getInstance();
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH);
-        int day = c.get(Calendar.DAY_OF_MONTH);
-
-        return new DatePickerDialog(getActivity(), this, year, month, day);
+        return new DatePickerDialog(getActivity(),
+                this,
+                time.getYear(),
+                time.getMonthValue() - 1,
+                time.getDayOfMonth());
     }
 
     @Override
     public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
         TaskDetailsActivity activity = (TaskDetailsActivity) requireActivity();
         if (endTime)
-            activity.setEndTime(i, i1, i2);
+            activity.setEndTime(LocalDateTime.of(i, i1 + 1, i2, 0, 0));
         else
-            activity.setStartTime(i, i1, i2);
+            activity.setStartTime(LocalDateTime.of(i, i1 + 1, i2, 0, 0));
     }
 }
