@@ -13,13 +13,17 @@ import java.time.LocalDateTime;
 
 public class TaskDetailsActivity extends AppCompatActivity {
 
-    private Task currentTask = new Task("",
+    public static final String EXTRA_TASK_DELETE = "task_delete";
+
+    private Task currentTask = new Task(0,
+            "",
             LocalDateTime.now(),
             LocalDateTime.now().plusDays(1),
             "");
+    private boolean editMode = false;
 
-    LocalDateTime startTime;
-    LocalDateTime endTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +36,10 @@ public class TaskDetailsActivity extends AppCompatActivity {
         EditText descriptionEditText = findViewById(R.id.description_edittext);
 
         Bundle extras = getIntent().getExtras();
-        if (extras != null)
+        if (extras != null) {
+            editMode = true;
             currentTask = Task.getTaskFromBundle(extras);
+        }
 
         titleEditText.setText(currentTask.getTitle());
         startTimeEditText.setText(currentTask.getFormattedStartTime());
@@ -57,6 +63,7 @@ public class TaskDetailsActivity extends AppCompatActivity {
         });
 
         Button saveButton = findViewById(R.id.save_button);
+        Button deleteButton = findViewById(R.id.delete_button);
         Button cancelButton = findViewById(R.id.cancel_button);
 
         saveButton.setOnClickListener(view -> {
@@ -66,6 +73,19 @@ public class TaskDetailsActivity extends AppCompatActivity {
             currentTask.setDescription(descriptionEditText.getText().toString());
             Intent resultIntent = new Intent();
             resultIntent.putExtras(Task.getBundleFromTask(currentTask));
+            resultIntent.putExtra(EXTRA_TASK_DELETE, false);
+            setResult(RESULT_OK, resultIntent);
+            finish();
+        });
+
+        if (!editMode) {
+            deleteButton.setEnabled(false);
+        }
+
+        deleteButton.setOnClickListener(view -> {
+            Intent resultIntent = new Intent();
+            resultIntent.putExtras(Task.getBundleFromTask(currentTask));
+            resultIntent.putExtra(EXTRA_TASK_DELETE, true);
             setResult(RESULT_OK, resultIntent);
             finish();
         });
