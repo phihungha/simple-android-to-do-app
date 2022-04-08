@@ -8,6 +8,8 @@
         <entry key="..\:/Dev/Learn/Android/ToDoList/app/src/main/res/layout/activity_main.xml" value="0.264" />
         <entry key="..\:/Dev/Learn/Android/ToDoList/app/src/main/res/layout/activity_task_details.xml" value="0.264" />
         <entry key="..\:/Dev/Learn/Android/ToDoList/app/src/main/res/layout/fragment_date_picker_dialog.xml" value="0.1" />
+        <entry key="..\:/Dev/Learn/Android/ToDoList/app/src/main/res/layout/fragment_time_picker.xml" value="0.1" />
+        <entry key="..\:/Dev/Learn/Android/ToDoList/app/src/main/res/layout/fragment_tine_picker.xml" value="0.1" />
         <entry key="..\:/Dev/Learn/Android/ToDoList/app/src/main/res/layout/task_item.xml" value="0.176" />
       </map>
     </option>

@@ -4,36 +4,51 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 public class TaskDetailsActivity extends AppCompatActivity {
 
     public static final String EXTRA_TASK_DELETE = "task_delete";
+
+    public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
     private Task currentTask = new Task(0,
             "",
             LocalDateTime.now(),
             LocalDateTime.now().plusDays(1),
             "");
-    private boolean editMode = false;
 
+    private boolean editMode = false;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+
+    EditText titleEditText;
+    EditText startDateEditText;
+    EditText startHourMinuteEditText;
+    EditText endDateEditText;
+    EditText endHourMinuteEditText;
+    EditText descriptionEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_details);
 
-        EditText titleEditText = findViewById(R.id.title_edittext);
-        EditText startTimeEditText = findViewById(R.id.startTimeEditText);
-        EditText endTimeEditText = findViewById(R.id.endTimeEditText);
-        EditText descriptionEditText = findViewById(R.id.description_edittext);
+        titleEditText = findViewById(R.id.title_edittext);
+        startDateEditText = findViewById(R.id.start_date_edittext);
+        endDateEditText = findViewById(R.id.end_date_edittext);
+        startHourMinuteEditText = findViewById(R.id.start_hour_minute_edittext);
+        endHourMinuteEditText = findViewById(R.id.end_hour_minute_edittext);
+        descriptionEditText = findViewById(R.id.description_edittext);
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -41,54 +56,45 @@ public class TaskDetailsActivity extends AppCompatActivity {
             currentTask = Task.getTaskFromBundle(extras);
         }
 
-        titleEditText.setText(currentTask.getTitle());
-        startTimeEditText.setText(currentTask.getFormattedStartTime());
-        endTimeEditText.setText(currentTask.getFormattedEndTime());
-        descriptionEditText.setText(currentTask.getDescription());
-
         startTime = currentTask.getStartTime();
         endTime = currentTask.getEndTime();
 
-        ImageButton startDateButton = findViewById(R.id.start_date_button);
-        ImageButton endDateButton = findViewById(R.id.end_date_button);
+        titleEditText.setText(currentTask.getTitle());
+        startDateEditText.setText(startTime.format(dateFormatter));
+        endDateEditText.setText(endTime.format(dateFormatter));
+        startHourMinuteEditText.setText(startTime.format(timeFormatter));
+        endHourMinuteEditText.setText(endTime.format(timeFormatter));
+        descriptionEditText.setText(currentTask.getDescription());
 
-        startDateButton.setOnClickListener(view -> {
-            DialogFragment newFragment = new DatePickerFragment(false, startTime);
-            newFragment.show(getSupportFragmentManager(), "startTimeDatePicker");
+        startDateEditText.setOnClickListener(view -> {
+            DialogFragment newFragment = new DatePickerFragment(false, startTime.toLocalDate());
+            newFragment.show(getSupportFragmentManager(), "startDatePicker");
         });
 
-        endDateButton.setOnClickListener(view -> {
-            DialogFragment newFragment = new DatePickerFragment(true, endTime);
-            newFragment.show(getSupportFragmentManager(), "endTimeDatePicker");
+        endDateEditText.setOnClickListener(view -> {
+            DialogFragment newFragment = new DatePickerFragment(true, endTime.toLocalDate());
+            newFragment.show(getSupportFragmentManager(), "endDatePicker");
+        });
+
+        startHourMinuteEditText.setOnClickListener(view -> {
+            DialogFragment newFragment = new TimePickerFragment(false, startTime.toLocalTime());
+            newFragment.show(getSupportFragmentManager(), "startHourMinutePicker");
+        });
+
+        endHourMinuteEditText.setOnClickListener(view -> {
+            DialogFragment newFragment = new TimePickerFragment(true, endTime.toLocalTime());
+            newFragment.show(getSupportFragmentManager(), "endHourMinutePicker");
         });
 
         Button saveButton = findViewById(R.id.save_button);
         Button deleteButton = findViewById(R.id.delete_button);
         Button cancelButton = findViewById(R.id.cancel_button);
 
-        saveButton.setOnClickListener(view -> {
-            currentTask.setTitle(titleEditText.getText().toString());
-            currentTask.setStartTime(startTime);
-            currentTask.setEndTime(endTime);
-            currentTask.setDescription(descriptionEditText.getText().toString());
-            Intent resultIntent = new Intent();
-            resultIntent.putExtras(Task.getBundleFromTask(currentTask));
-            resultIntent.putExtra(EXTRA_TASK_DELETE, false);
-            setResult(RESULT_OK, resultIntent);
-            finish();
-        });
+        saveButton.setOnClickListener(view -> saveTask());
 
-        if (!editMode) {
+        if (!editMode)
             deleteButton.setEnabled(false);
-        }
-
-        deleteButton.setOnClickListener(view -> {
-            Intent resultIntent = new Intent();
-            resultIntent.putExtras(Task.getBundleFromTask(currentTask));
-            resultIntent.putExtra(EXTRA_TASK_DELETE, true);
-            setResult(RESULT_OK, resultIntent);
-            finish();
-        });
+        deleteButton.setOnClickListener(view -> deleteTask());
 
         cancelButton.setOnClickListener(view -> {
             setResult(RESULT_CANCELED);
@@ -96,20 +102,62 @@ public class TaskDetailsActivity extends AppCompatActivity {
         });
     }
 
-    public void setStartTime(LocalDateTime time) {
-        startTime = time;
-        EditText startTimeEditText = findViewById(R.id.startTimeEditText);
-        startTimeEditText.setText(startTime.format(Task.dateTimeFormatter));
-        if (endTime.isBefore(startTime))
-            setEndTime(startTime.plusDays(1));
+    private void saveTask() {
+        if (titleEditText.getText().toString().isEmpty()) {
+            Toast.makeText(this, "Title cannot be empty", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        currentTask.setTitle(titleEditText.getText().toString());
+        currentTask.setStartTime(startTime);
+        currentTask.setEndTime(endTime);
+        currentTask.setDescription(descriptionEditText.getText().toString());
+        Intent resultIntent = new Intent();
+        resultIntent.putExtras(Task.getBundleFromTask(currentTask));
+        resultIntent.putExtra(EXTRA_TASK_DELETE, false);
+        setResult(RESULT_OK, resultIntent);
+        finish();
     }
 
-    public void setEndTime(LocalDateTime time) {
-        endTime = time;
-        EditText endTimeEditText = findViewById(R.id.endTimeEditText);
-        endTimeEditText.setText(endTime.format(Task.dateTimeFormatter));
+    private void deleteTask() {
+        Intent resultIntent = new Intent();
+        resultIntent.putExtras(Task.getBundleFromTask(currentTask));
+        resultIntent.putExtra(EXTRA_TASK_DELETE, true);
+        setResult(RESULT_OK, resultIntent);
+        finish();
+    }
+
+    private void setStartTime(LocalDateTime time) {
+        startTime = time;
+        startDateEditText.setText(startTime.format(dateFormatter));
+        startHourMinuteEditText.setText(startTime.format(timeFormatter));
 
         if (startTime.isAfter(endTime))
-            setStartTime(endTime.minusDays(1));
+            setEndTime(startTime.plusMinutes(1));
+    }
+
+    private void setEndTime(LocalDateTime time) {
+        endTime = time;
+        endDateEditText.setText(endTime.format(dateFormatter));
+        endHourMinuteEditText.setText(endTime.format(timeFormatter));
+
+        if (endTime.isBefore(startTime))
+            setStartTime(endTime.minusMinutes(1));
+    }
+
+    public void setStartDate(LocalDate date) {
+        setStartTime(LocalDateTime.of(date, startTime.toLocalTime()));
+    }
+
+    public void setEndDate(LocalDate date) {
+        setEndTime(LocalDateTime.of(date, endTime.toLocalTime()));
+    }
+
+    public void setStartHourMinute(LocalTime time) {
+        setStartTime(LocalDateTime.of(startTime.toLocalDate(), time));
+    }
+
+    public void setEndHourMinute(LocalTime time) {
+        setEndTime(LocalDateTime.of(endTime.toLocalDate(), time));
     }
 }

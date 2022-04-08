@@ -3,28 +3,22 @@ package com.example.todolist;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.os.Bundle;
+import android.widget.DatePicker;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
-import android.widget.DatePicker;
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Calendar;
 
 public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
     private final boolean endTime;
 
-    private final LocalDateTime time;
+    private final LocalDate time;
 
-    public DatePickerFragment(boolean endTime, LocalDateTime time) {
+    public DatePickerFragment(boolean endTime, LocalDate time) {
         this.endTime = endTime;
         this.time = time;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     @NonNull
@@ -41,8 +35,8 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
     public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
         TaskDetailsActivity activity = (TaskDetailsActivity) requireActivity();
         if (endTime)
-            activity.setEndTime(LocalDateTime.of(i, i1 + 1, i2, 0, 0));
+            activity.setEndDate(LocalDate.of(i, i1 + 1, i2));
         else
-            activity.setStartTime(LocalDateTime.of(i, i1 + 1, i2, 0, 0));
+            activity.setStartDate(LocalDate.of(i, i1 + 1, i2));
     }
 }
