@@ -21,7 +21,7 @@ public class TaskDetailsActivity extends AppCompatActivity {
     public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     public static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
-    private Task currentTask = new Task(0,
+    private Task currentTask = new Task("",
             "",
             LocalDateTime.now(),
             LocalDateTime.now().plusDays(1),

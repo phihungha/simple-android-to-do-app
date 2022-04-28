@@ -15,9 +15,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 class TaskEditResult {
@@ -41,9 +43,9 @@ class TaskEditResult {
 
 public class MainActivity extends AppCompatActivity {
 
+    private FirebaseAuth firebaseAuth;
     private TaskDatabase taskDb;
     private final List<Task> tasks = new ArrayList<>();
-    private TaskItemAdapter taskItemAdapter;
 
     private class AddTaskActivityContract extends ActivityResultContract<Void, Task> {
         @NonNull
@@ -103,8 +105,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        firebaseAuth = FirebaseAuth.getInstance();
+
         ListView taskListView = findViewById(R.id.task_list);
-        taskItemAdapter = new TaskItemAdapter(this, tasks);
+        TaskItemAdapter taskItemAdapter = new TaskItemAdapter(this, tasks);
         taskListView.setAdapter(taskItemAdapter);
         taskListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -116,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton addTaskButton = findViewById(R.id.add_task_fab);
         addTaskButton.setOnClickListener(view -> startAddTaskActivity.launch(null));
 
-        taskDb = new TaskDatabase("Ta3mN05fccnHNLGx6Lqq", tasks, taskItemAdapter);
+        taskDb = new TaskDatabase(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid(), tasks, taskItemAdapter);
     }
 
     private void addTask(Task task) {

@@ -2,75 +2,91 @@ package com.example.todolist;
 
 import android.util.Log;
 
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class TaskDatabase {
 
     private static final String TAG = "TaskDatabase";
 
-    private final FirebaseFirestore firestore;
-
-    private final String currentUserId;
+    private final CollectionReference firestoreTasks;
     private final List<Task> tasks;
     private final TaskItemAdapter adapter;
 
     public TaskDatabase(String currentUserId, List<Task> tasks, TaskItemAdapter adapter) {
-        firestore = FirebaseFirestore.getInstance();
-        this.currentUserId = currentUserId;
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        firestoreTasks = firestore.collection("users").document(currentUserId).collection("tasks");
         this.adapter = adapter;
         this.tasks = tasks;
-        firestore.collection("users").document(currentUserId).addSnapshotListener((snapshot, error) -> {
+        firestoreTasks.addSnapshotListener((snapshot, error) -> {
             if (error != null) {
                 Log.w(TAG, "Listen failed.", error);
                 return;
             }
 
-            if (snapshot != null && snapshot.exists()) {
-                Map<String, Object> newData = snapshot.getData();
-                if (newData != null)
-                    getAllTasks(snapshot.getData());
+            if (snapshot != null) {
+                loadAllTasks(snapshot.getDocuments());
             } else {
                 Log.d(TAG, "Current data: null");
             }
         });
     }
 
-    public void getAllTasks(Map<String, Object> newData) {
+    public void loadAllTasks(List<DocumentSnapshot> documents) {
         tasks.clear();
 
-        int i = 0;
-        for (String id: newData.keySet()) {
-            Map<String, Object> task = (Map<String, Object>)newData.get(id);
-            String title = (String) task.get("title");
-            String description = (String) task.get("description");
-            long startTime = (long) task.get("startTime");
-            long endTime = (long) task.get("endTime");
-            tasks.add(new Task(i, title, startTime, endTime, description));
-            i++;
+        for (DocumentSnapshot document : documents) {
+            Map<String, Object> task = document.getData();
+            if (task != null) {
+                String title = (String) task.get("title");
+                String description = (String) task.get("description");
+                LocalDateTime startTime = createLocalDateTime((Timestamp) Objects.requireNonNull(task.get("startTime")));
+                LocalDateTime endTime = createLocalDateTime((Timestamp) Objects.requireNonNull(task.get("endTime")));
+                tasks.add(new Task(document.getId(), title, startTime, endTime, description));
+            }
         }
 
         adapter.notifyDataSetChanged();
     }
 
     public void addTask(Task task) {
-        Map<String, Object> newData = new HashMap<>();
-        newData.put("title", task.getTitle());
-        newData.put("description", task.getDescription());
-        newData.put("startTime", task.getStartTimeEpoch());
-        newData.put("endTime", task.getEndTimeEpoch());
-        firestore.collection("users").document(currentUserId)
-                .set(newData);
+        firestoreTasks.document().set(createNewValuesMapFromTask(task));
     }
 
     public void updateTask(Task task) {
-
+        firestoreTasks.document(task.getId()).update(createNewValuesMapFromTask(task));
     }
 
     public void deleteTask(Task task) {
+        firestoreTasks.document(task.getId()).delete();
+    }
 
+    public Map<String, Object> createNewValuesMapFromTask(Task task) {
+        Map<String, Object> newValues = new HashMap<>();
+        newValues.put("title", task.getTitle());
+        newValues.put("description", task.getDescription());
+        newValues.put("startTime", createTimestamp(task.getStartTime()));
+        newValues.put("endTime", createTimestamp(task.getEndTime()));
+        return newValues;
+    }
+
+    public LocalDateTime createLocalDateTime(Timestamp timestamp) {
+        Date date = timestamp.toDate();
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+    }
+
+    public Timestamp createTimestamp(LocalDateTime dateTime) {
+        Date date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
+        return new Timestamp(date);
     }
 }

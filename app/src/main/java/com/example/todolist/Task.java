@@ -15,13 +15,13 @@ public class Task {
     public static final String EXTRA_TASK_END_TIME = "task_end_time";
     public static final String EXTRA_TASK_DESCRIPTION = "task_description";
 
-    private final long id;
+    private final String id;
     private String title;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String description;
 
-    public Task(long id, String title, LocalDateTime startTime, LocalDateTime endTime, String description) {
+    public Task(String id, String title, LocalDateTime startTime, LocalDateTime endTime, String description) {
         this.id = id;
         this.title = title;
         this.startTime = startTime;
@@ -29,7 +29,7 @@ public class Task {
         this.description = description;
     }
 
-    public Task(long id, String title, long startTimeEpoch, long endTimeEpoch, String description) {
+    public Task(String id, String title, long startTimeEpoch, long endTimeEpoch, String description) {
         this.id = id;
         this.title = title;
         this.startTime = LocalDateTime.ofEpochSecond(startTimeEpoch, 0, ZoneOffset.UTC);
@@ -38,7 +38,7 @@ public class Task {
     }
 
     public static Task getTaskFromBundle(Bundle bundle) {
-        long id = bundle.getLong(EXTRA_TASK_ID);
+        String id = bundle.getString(EXTRA_TASK_ID);
         String title = bundle.getString(EXTRA_TASK_TITLE);
         long startTimeEpoch = bundle.getLong(EXTRA_TASK_START_TIME, 0);
         long endTimeEpoch = bundle.getLong(EXTRA_TASK_END_TIME, 0);
@@ -48,7 +48,7 @@ public class Task {
 
     public static Bundle getBundleFromTask(Task task) {
         Bundle bundle = new Bundle();
-        bundle.putLong(EXTRA_TASK_ID, task.getId());
+        bundle.putString(EXTRA_TASK_ID, task.getId());
         bundle.putString(EXTRA_TASK_TITLE, task.getTitle());
         bundle.putLong(EXTRA_TASK_START_TIME, task.getStartTimeEpoch());
         bundle.putLong(EXTRA_TASK_END_TIME, task.getEndTimeEpoch());
@@ -56,7 +56,7 @@ public class Task {
         return bundle;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
@@ -76,10 +76,6 @@ public class Task {
         return getStartTime().toEpochSecond(ZoneOffset.UTC);
     }
 
-    public String getFormattedStartTime() {
-        return startTime.format(dateTimeFormatter);
-    }
-
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
@@ -90,10 +86,6 @@ public class Task {
 
     public long getEndTimeEpoch() {
         return getEndTime().toEpochSecond(ZoneOffset.UTC);
-    }
-
-    public String getFormattedEndTime() {
-        return endTime.format(dateTimeFormatter);
     }
 
     public void setEndTime(LocalDateTime endTime) {
