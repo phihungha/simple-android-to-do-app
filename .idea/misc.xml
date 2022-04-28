@@ -5,6 +5,7 @@
       <map>
         <entry key="..\:/Dev/Learn/Android/ToDoList/app/src/main/res/drawable/add_icon.xml" value="0.2445" />
         <entry key="..\:/Dev/Learn/Android/ToDoList/app/src/main/res/layout/activity_add_task.xml" value="0.264" />
+        <entry key="..\:/Dev/Learn/Android/ToDoList/app/src/main/res/layout/activity_login.xml" value="0.264" />
         <entry key="..\:/Dev/Learn/Android/ToDoList/app/src/main/res/layout/activity_main.xml" value="0.264" />
         <entry key="..\:/Dev/Learn/Android/ToDoList/app/src/main/res/layout/activity_task_details.xml" value="0.264" />
         <entry key="..\:/Dev/Learn/Android/ToDoList/app/src/main/res/layout/fragment_date_picker_dialog.xml" value="0.1" />

@@ -116,28 +116,18 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton addTaskButton = findViewById(R.id.add_task_fab);
         addTaskButton.setOnClickListener(view -> startAddTaskActivity.launch(null));
 
-        taskDb = new TaskDatabase(this);
-        loadAllTasks();
-    }
-
-    private void loadAllTasks() {
-        tasks.clear();
-        tasks.addAll(taskDb.getAllTasks());
-        taskItemAdapter.notifyDataSetChanged();
+        taskDb = new TaskDatabase("Ta3mN05fccnHNLGx6Lqq", tasks, taskItemAdapter);
     }
 
     private void addTask(Task task) {
         taskDb.addTask(task);
-        loadAllTasks();
     }
 
     private void updateTask(Task task) {
         taskDb.updateTask(task);
-        loadAllTasks();
     }
 
     private void deleteTask(Task task) {
         taskDb.deleteTask(task);
-        loadAllTasks();
     }
 }

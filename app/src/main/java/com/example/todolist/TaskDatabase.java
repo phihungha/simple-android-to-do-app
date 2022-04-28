@@ -1,85 +1,76 @@
 package com.example.todolist;
 
-import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
-import androidx.annotation.Nullable;
+import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class TaskDatabase extends SQLiteOpenHelper {
+public class TaskDatabase {
 
-    private static final String DATABASE_NAME = "task_database";
-    private static final int DATABASE_VERSION = 1;
+    private static final String TAG = "TaskDatabase";
 
-    public TaskDatabase(@Nullable Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    private final FirebaseFirestore firestore;
+
+    private final String currentUserId;
+    private final List<Task> tasks;
+    private final TaskItemAdapter adapter;
+
+    public TaskDatabase(String currentUserId, List<Task> tasks, TaskItemAdapter adapter) {
+        firestore = FirebaseFirestore.getInstance();
+        this.currentUserId = currentUserId;
+        this.adapter = adapter;
+        this.tasks = tasks;
+        firestore.collection("users").document(currentUserId).addSnapshotListener((snapshot, error) -> {
+            if (error != null) {
+                Log.w(TAG, "Listen failed.", error);
+                return;
+            }
+
+            if (snapshot != null && snapshot.exists()) {
+                Map<String, Object> newData = snapshot.getData();
+                if (newData != null)
+                    getAllTasks(snapshot.getData());
+            } else {
+                Log.d(TAG, "Current data: null");
+            }
+        });
     }
-    
-    @Override
-    public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        String query = "CREATE TABLE IF NOT EXISTS " + "tasks (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "title VARCHAR (255) NOT NULL, " +
-                "startTime INTEGER," +
-                "endTime INTEGER," +
-                "description TEXT" +
-                ")";
-        sqLiteDatabase.execSQL(query);
-    }
 
-    @Override
-    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+    public void getAllTasks(Map<String, Object> newData) {
+        tasks.clear();
 
-    }
-
-    public List<Task> getAllTasks() {
-        List<Task> tasks = new ArrayList<>();
-
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM tasks", null);
-
-        while (cursor.moveToNext()) {
-            long id = cursor.getLong(0);
-            String title = cursor.getString(1);
-            long startTime = cursor.getLong(2);
-            long endTime = cursor.getLong(3);
-            String description = cursor.getString(4);
-            tasks.add(new Task(id, title, startTime, endTime, description));
+        int i = 0;
+        for (String id: newData.keySet()) {
+            Map<String, Object> task = (Map<String, Object>)newData.get(id);
+            String title = (String) task.get("title");
+            String description = (String) task.get("description");
+            long startTime = (long) task.get("startTime");
+            long endTime = (long) task.get("endTime");
+            tasks.add(new Task(i, title, startTime, endTime, description));
+            i++;
         }
 
-        cursor.close();
-
-        return tasks;
+        adapter.notifyDataSetChanged();
     }
 
     public void addTask(Task task) {
-        SQLiteDatabase db = getWritableDatabase();
-        db.execSQL("INSERT INTO tasks (title, startTime, endTime, description) VALUES (?, ?, ?, ?)",
-                new String[]{task.getTitle(),
-                        Long.toString(task.getStartTimeEpoch()),
-                        Long.toString(task.getEndTimeEpoch()),
-                        task.getDescription()});
+        Map<String, Object> newData = new HashMap<>();
+        newData.put("title", task.getTitle());
+        newData.put("description", task.getDescription());
+        newData.put("startTime", task.getStartTimeEpoch());
+        newData.put("endTime", task.getEndTimeEpoch());
+        firestore.collection("users").document(currentUserId)
+                .set(newData);
     }
 
     public void updateTask(Task task) {
-        SQLiteDatabase db = getWritableDatabase();
-        db.execSQL("UPDATE tasks SET title=?, startTime=?, endTime=?, description=? where id = ?",
-                new String[]
-                        {
-                                task.getTitle(),
-                                Long.toString(task.getStartTimeEpoch()),
-                                Long.toString(task.getEndTimeEpoch()),
-                                task.getDescription(),
-                                Long.toString(task.getId())
-                        });
+
     }
 
     public void deleteTask(Task task) {
-        SQLiteDatabase db = getWritableDatabase();
-        db.execSQL("DELETE FROM tasks WHERE id = ?", new Long[] {task.getId()});
+
     }
 }
