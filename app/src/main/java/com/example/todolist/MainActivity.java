@@ -43,7 +43,6 @@ class TaskEditResult {
 
 public class MainActivity extends AppCompatActivity {
 
-    private FirebaseAuth firebaseAuth;
     private TaskDatabase taskDb;
     private final List<Task> tasks = new ArrayList<>();
 
@@ -105,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
 
         ListView taskListView = findViewById(R.id.task_list);
         TaskItemAdapter taskItemAdapter = new TaskItemAdapter(this, tasks);

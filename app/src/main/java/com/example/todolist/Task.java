@@ -2,8 +2,9 @@ package com.example.todolist;
 
 import android.os.Bundle;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Task {
@@ -17,11 +18,11 @@ public class Task {
 
     private final String id;
     private String title;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private ZonedDateTime startTime;
+    private ZonedDateTime endTime;
     private String description;
 
-    public Task(String id, String title, LocalDateTime startTime, LocalDateTime endTime, String description) {
+    public Task(String id, String title, ZonedDateTime startTime, ZonedDateTime endTime, String description) {
         this.id = id;
         this.title = title;
         this.startTime = startTime;
@@ -32,8 +33,8 @@ public class Task {
     public Task(String id, String title, long startTimeEpoch, long endTimeEpoch, String description) {
         this.id = id;
         this.title = title;
-        this.startTime = LocalDateTime.ofEpochSecond(startTimeEpoch, 0, ZoneOffset.UTC);
-        this.endTime = LocalDateTime.ofEpochSecond(endTimeEpoch, 0, ZoneOffset.UTC);
+        this.startTime = createZonedDateTimeFromEpoch(startTimeEpoch);
+        this.endTime = createZonedDateTimeFromEpoch(endTimeEpoch);
         this.description = description;
     }
 
@@ -56,6 +57,10 @@ public class Task {
         return bundle;
     }
 
+    private ZonedDateTime createZonedDateTimeFromEpoch(long epoch) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochSecond(epoch), ZoneId.systemDefault());
+    }
+
     public String getId() {
         return id;
     }
@@ -68,27 +73,27 @@ public class Task {
         this.title = title;
     }
 
-    public LocalDateTime getStartTime() {
+    public ZonedDateTime getStartTime() {
         return startTime;
     }
 
     public long getStartTimeEpoch() {
-        return getStartTime().toEpochSecond(ZoneOffset.UTC);
+        return getStartTime().toEpochSecond();
     }
 
-    public void setStartTime(LocalDateTime startTime) {
+    public void setStartTime(ZonedDateTime startTime) {
         this.startTime = startTime;
     }
 
-    public LocalDateTime getEndTime() {
+    public ZonedDateTime getEndTime() {
         return endTime;
     }
 
     public long getEndTimeEpoch() {
-        return getEndTime().toEpochSecond(ZoneOffset.UTC);
+        return getEndTime().toEpochSecond();
     }
 
-    public void setEndTime(LocalDateTime endTime) {
+    public void setEndTime(ZonedDateTime endTime) {
         this.endTime = endTime;
     }
 

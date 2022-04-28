@@ -7,8 +7,8 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -50,8 +50,8 @@ public class TaskDatabase {
             if (task != null) {
                 String title = (String) task.get("title");
                 String description = (String) task.get("description");
-                LocalDateTime startTime = createLocalDateTime((Timestamp) Objects.requireNonNull(task.get("startTime")));
-                LocalDateTime endTime = createLocalDateTime((Timestamp) Objects.requireNonNull(task.get("endTime")));
+                ZonedDateTime startTime = createZonedDateTimeFromTimestamp((Timestamp) Objects.requireNonNull(task.get("startTime")));
+                ZonedDateTime endTime = createZonedDateTimeFromTimestamp((Timestamp) Objects.requireNonNull(task.get("endTime")));
                 tasks.add(new Task(document.getId(), title, startTime, endTime, description));
             }
         }
@@ -80,13 +80,13 @@ public class TaskDatabase {
         return newValues;
     }
 
-    public LocalDateTime createLocalDateTime(Timestamp timestamp) {
+    public ZonedDateTime createZonedDateTimeFromTimestamp(Timestamp timestamp) {
         Date date = timestamp.toDate();
-        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        return ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
     }
 
-    public Timestamp createTimestamp(LocalDateTime dateTime) {
-        Date date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
+    public Timestamp createTimestamp(ZonedDateTime dateTime) {
+        Date date = Date.from(dateTime.toInstant());
         return new Timestamp(date);
     }
 }

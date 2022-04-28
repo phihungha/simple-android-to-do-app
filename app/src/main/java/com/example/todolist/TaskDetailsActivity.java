@@ -12,6 +12,8 @@ import androidx.fragment.app.DialogFragment;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class TaskDetailsActivity extends AppCompatActivity {
@@ -23,13 +25,13 @@ public class TaskDetailsActivity extends AppCompatActivity {
 
     private Task currentTask = new Task("",
             "",
-            LocalDateTime.now(),
-            LocalDateTime.now().plusDays(1),
+            ZonedDateTime.now(),
+            ZonedDateTime.now().plusDays(1),
             "");
 
     private boolean editMode = false;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private ZonedDateTime startTime;
+    private ZonedDateTime endTime;
 
     EditText titleEditText;
     EditText startDateEditText;
@@ -128,21 +130,21 @@ public class TaskDetailsActivity extends AppCompatActivity {
     }
 
     private void setStartTime(LocalDateTime time) {
-        startTime = time;
+        startTime = time.atZone(ZoneId.systemDefault());
         startDateEditText.setText(startTime.format(dateFormatter));
         startHourMinuteEditText.setText(startTime.format(timeFormatter));
 
         if (startTime.isAfter(endTime))
-            setEndTime(startTime.plusMinutes(1));
+            setEndTime(time.plusMinutes(1));
     }
 
     private void setEndTime(LocalDateTime time) {
-        endTime = time;
+        endTime = time.atZone(ZoneId.systemDefault());
         endDateEditText.setText(endTime.format(dateFormatter));
         endHourMinuteEditText.setText(endTime.format(timeFormatter));
 
         if (endTime.isBefore(startTime))
-            setStartTime(endTime.minusMinutes(1));
+            setStartTime(time.minusMinutes(1));
     }
 
     public void setStartDate(LocalDate date) {
