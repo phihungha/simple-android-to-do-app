@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -43,7 +46,9 @@ class TaskEditResult {
 
 public class MainActivity extends AppCompatActivity {
 
+    FirebaseAuth firebaseAuth;
     private TaskDatabase taskDb;
+
     private final List<Task> tasks = new ArrayList<>();
 
     private class AddTaskActivityContract extends ActivityResultContract<Void, Task> {
@@ -104,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        firebaseAuth = FirebaseAuth.getInstance();
 
         ListView taskListView = findViewById(R.id.task_list);
         TaskItemAdapter taskItemAdapter = new TaskItemAdapter(this, tasks);
@@ -120,6 +125,22 @@ public class MainActivity extends AppCompatActivity {
         addTaskButton.setOnClickListener(view -> startAddTaskActivity.launch(null));
 
         taskDb = new TaskDatabase(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getUid(), tasks, taskItemAdapter);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.logout_menu_item) {
+            firebaseAuth.signOut();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        }
+        return true;
     }
 
     private void addTask(Task task) {
